@@ -12,9 +12,15 @@ Route::get('/', function () {
 });
 
 Route::get('/posts', function () {
+    $posts = Post::with(['author', 'type'])->latest();
+    if(request('search')){
+        $posts->where('title', 'like', '%' . request('search') . '%')
+              ->orWhere('body', 'like', '%' . request('search') . '%');
+    }
+
     return view('posts', [
         'title' => 'Posts',
-        'posts' => Post::with(['author', 'type'])->latest()->get(),
+        'posts' => $posts->paginate(5),
     ]);
 });
 
