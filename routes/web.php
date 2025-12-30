@@ -14,7 +14,7 @@ Route::get('/', function () {
 Route::get('/posts', function () {
     return view('posts', [
         'title' => 'Posts',
-        'posts' => Post::all()
+        'posts' => Post::with(['author', 'type'])->latest()->get(),
     ]);
 });
 
@@ -29,15 +29,17 @@ Route::get('/contact', function () {
 
 Route::get('/posts/{post:id}', function (Post $post) {
     // $post = Post::find($id);
-return view('post', ['title' => 'Single Post', 'post' => $post]);
+    return view('post', ['title' => 'Single Post', 'post' => $post]);
 });
 
 Route::get('/authors/{user:username}', function (User $user) {
-    // $post = Post::find($id);
-return view('posts', ['title' => "Post from " . $user->name, 'posts' => $user->posts]);
+    $posts = $user->posts->load('author', 'type');
+    return view('posts', ['title' => count($posts) . " Post from " . $user->name, 'posts' => $posts]);
+    // return view('posts', ['title' => count($user->posts) . " Post from " . $user->name, 'posts' => $user->posts]);
 });
 
 Route::get('/type/{type:name}', function (Type $type) {
-    // $post = Post::find($id);
-return view('posts', ['title' => "Post from " . $type->name, 'posts' => $type->posts]);
+    $posts = $type->posts->load('author', 'type');
+    return view('posts', ['title' => count($posts) . " Post about " . $type->name, 'posts' => $posts]);
+    // return view('posts', ['title' => count($type->posts) . " Post about " . $type->name, 'posts' => $type->posts]);
 });
